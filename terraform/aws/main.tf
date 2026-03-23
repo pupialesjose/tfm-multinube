@@ -3,31 +3,31 @@ provider "aws" {
 }
 
 # VPC
-resource "aws_vpc" "calculadora_vpc" {
+resource "aws_vpc" "multinube_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = { Name = "calculadora-vpc" }
+  tags = { Name = "multinube-vpc" }
 }
 
 # Subnet pública
 resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.calculadora_vpc.id
+  vpc_id                  = aws_vpc.multinube_vpc.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "${var.aws_region}a"
-  tags = { Name = "calculadora-subnet" }
+  tags = { Name = "multinube-subnet" }
 }
 
 # Internet Gateway
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.calculadora_vpc.id
-  tags = { Name = "calculadora-igw" }
+  vpc_id = aws_vpc.multinube_vpc.id
+  tags = { Name = "multinube-igw" }
 }
 
 # Route Table
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.calculadora_vpc.id
+  vpc_id = aws_vpc.multinube_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -35,7 +35,7 @@ resource "aws_route_table" "public_rt" {
   }
 
   tags = {
-    Name = "calculadora-public-rt"
+    Name = "multinube-public-rt"
   }
 }
 
@@ -47,8 +47,8 @@ resource "aws_route_table_association" "public_assoc" {
 
 # Security Group
 resource "aws_security_group" "app_sg" {
-  name   = "calculadora-sg"
-  vpc_id = aws_vpc.calculadora_vpc.id
+  name   = "multinube-sg"
+  vpc_id = aws_vpc.multinube_vpc.id
 
   ingress {
     from_port   = 8080
@@ -78,11 +78,11 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "calculadora-sg" }
+  tags = { Name = "multinube-sg" }
 }
 
 # EC2 Instance
-resource "aws_instance" "calculadora" {
+resource "aws_instance" "multinube" {
   ami                         = var.ami_id
   instance_type               = "t2.micro"
   key_name                    = var.key_name
@@ -100,5 +100,5 @@ resource "aws_instance" "calculadora" {
     docker run -d -p 8080:8080 ${var.docker_image}
   EOF
 
-  tags = { Name = "calculadora-instance" }
+  tags = { Name = "multinube-instance" }
 }
